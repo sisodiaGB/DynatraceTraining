@@ -19,9 +19,8 @@ metadata:
     dynatrace.com/created-by: "dynatrace.kubernetes"
   annotations:
     feature.dynatrace.com/k8s-app-enabled: "true"
-# Link to api reference for further information: https://docs.dynatrace.com/docs/ingest-from/setup-on-k8s/reference/dynakube-parameters
 spec:
-  apiUrl: https://zkv22883.live.dynatrace.com/api
+  apiUrl: "https://zkv22883.live.dynatrace.com/api"
   tokens: eks-k8s-2026-03-19
   activeGate:
     capabilities:
@@ -54,9 +53,8 @@ metadata:
   namespace: dynatrace
   labels:
     dynatrace.com/created-by: "dynatrace.kubernetes"
-# Link to api reference for further information: https://docs.dynatrace.com/docs/ingest-from/setup-on-k8s/reference/dynakube-parameters
 spec:
-  apiUrl: https://zkv22883.live.dynatrace.com/api
+  apiUrl: "https://zkv22883.live.dynatrace.com/api"
   tokens: eks-k8s-2026-03-19
   metadataEnrichment:
     enabled: true
@@ -82,3 +80,4 @@ spec:
         memory: 4Gi
     replicas: 3
   logMonitoring: {}
+``
