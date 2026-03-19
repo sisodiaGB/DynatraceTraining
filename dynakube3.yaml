@@ -1,0 +1,118 @@
+apiVersion: v1
+data:
+  apiToken: ZHQwYzAxLldINjJOVkxSRVpTNFVPR0pBQUJZQkxNTC5UWVY3WE1QUllVVzNCSVlENkhGSkxHSUxPNFpTM0NYV0xWSko1NkdBR0FRVE1LNUJQQUo1SFA3RlpNUlpIWjVZ
+  dataIngestToken: ZHQwYzAxLkRFRVRXTElEQzVNQU0yVlNDRkFLSUlITS5OWTNHUTcyRkpVVkREQlBGRENSN1dQSFBDWTVVTkVYUVdPMzQ1TkNXVjVWNkozTVVBR0I3S1JWUzc2TkoyQ09K
+kind: Secret
+metadata:
+  name: eks-k8s-2026-03-19-new
+  namespace: dynatrace
+  labels:
+    dynatrace.com/created-by: "dynatrace.kubernetes"
+type: Opaque
+---
+apiVersion: dynatrace.com/v1beta6
+kind: DynaKube
+metadata:
+  name: eks-k8s-2026-03-19-new
+  namespace: dynatrace
+  labels:
+    dynatrace.com/created-by: "dynatrace.kubernetes"
+  annotations:
+    feature.dynatrace.com/k8s-app-enabled: "true"
+# Link to api reference for further information: https://docs.dynatrace.com/docs/ingest-from/setup-on-k8s/reference/dynakube-parameters
+spec:
+  apiUrl: https://zkv22883.live.dynatrace.com/api
+  tokens: eks-k8s-2026-03-19-new
+  activeGate:
+    capabilities:
+      - kubernetes-monitoring
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 10Gi
+      limits:
+        cpu: 2000m
+        memory: 10Gi
+    replicas: 1
+  templates:
+    otelCollector:
+      imageRef:
+        repository: public.ecr.aws/dynatrace/dynatrace-otel-collector
+        tag: latest
+  telemetryIngest:
+    protocols:
+      - jaeger
+      - otlp
+      - statsd
+      - zipkin
+    serviceName: telemetry-ingest
+---
+apiVersion: dynatrace.com/v1beta6
+kind: DynaKube
+metadata:
+  name: eks-k8s-2026-03-19-new-agents
+  namespace: dynatrace
+  labels:
+    dynatrace.com/created-by: "dynatrace.kubernetes"
+# Link to api reference for further information: https://docs.dynatrace.com/docs/ingest-from/setup-on-k8s/reference/dynakube-parameters
+spec:
+  apiUrl: https://zkv22883.live.dynatrace.com/api
+  tokens: eks-k8s-2026-03-19-new
+  metadataEnrichment:
+    enabled: true
+    namespaceSelector:
+      matchExpressions:
+        - key: dt-monitoring
+          operator: In
+          values:
+            - "true"
+  oneAgent:
+    cloudNativeFullStack:
+      namespaceSelector:
+        matchExpressions:
+          - key: dt-monitoring
+            operator: In
+            values:
+              - "true"
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+  activeGate:
+    capabilities:
+      - routing
+      - debugging
+    resources:
+      requests:
+        cpu: 500m
+        memory: 4Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+    replicas: 3
+  logMonitoring:
+    ingestRuleMatchers:
+      - attribute: k8s.namespace.name
+        values:
+          - easytrade
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.dynatrace.com/aggregate-to-monitoring: "true"
+    dynatrace.com/created-by: "dynatrace.kubernetes"
+  name: dynatrace-kubernetes-monitoring-sensitive
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - secrets
+    verbs:
+      - list
+      - watch
+      - get
